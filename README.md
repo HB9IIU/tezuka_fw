@@ -1,5 +1,9 @@
 ![tezuka banner](/doc/tezuka.png)
 
+> **Personal experimental fork — HB9IIU**
+>
+> I forked [F5OEO/tezuka_fw](https://github.com/F5OEO/tezuka_fw) solely for my own experiments and learning. Changes in this fork may be untested and are not intended as firmware releases for others to use. For the original project, documentation, and releases, please visit the upstream repository.
+
 [![Tezuka](https://github.com/F5OEO/tezuka_fw/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/F5OEO/tezuka_fw/actions/workflows/main.yml)
 [![GitHub Release](https://img.shields.io/github/release/F5OEO/tezuka_fw.svg)](https://github.com/F5OEO/tezuka_fw/releases/latest)  [![Github Releases](https://img.shields.io/github/downloads/F5OEO/tezuka_fw/total.svg)](https://github.com/F5OEO/tezuka_fw/releases/latest)
 
