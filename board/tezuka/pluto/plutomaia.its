@@ -54,11 +54,12 @@
 
 		linux_kernel@1 {
 			description = "Linux";
-			data = /incbin/("Image.lzma");
+			/* Stock Pluto U-Boot supports gzip, but not LZMA. */
+			data = /incbin/("Image.gz");
 			type = "kernel";
 			arch = "arm";
 			os = "linux";
-			compression = "lzma";
+			compression = "gzip";
 			load = <0x8000>;
 			entry = <0x8000>;
 			hash@1 {

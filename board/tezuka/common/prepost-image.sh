@@ -26,23 +26,23 @@ skip=$(LC_ALL=C grep -a -b -o -P '\x1f\x8b\x08' "$BIN_DIR/zImage" | head -1 | cu
 dd if="$BIN_DIR/zImage" bs=1 skip="$skip" | gunzip > "$BIN_DIR/Image" 2>/dev/null || true
 
 # Guard against the zImage self-decompression corruption from issue #450:
-# every board's flash FIT (plutomaia.its) loads the kernel at 0x8000 and
-# ships it as a self-extracting zImage (compression="none"). On real
+# Boards whose flash FIT (plutomaia.its) loads a self-extracting zImage
+# at 0x8000 (compression="none") are affected. On real
 # hardware this corrupts scattered bytes starting at Image-file offset
 # 0xE88000 (phys 0x8000 + 0xE88000 = 0xE90000) on every boot, once the
 # uncompressed kernel grows past it -- confirmed independent of bootloader
-# version. This does not affect Image.lzma / the SD uImage path, which
+# version. This does not affect compressed raw Image / the SD uImage path, which
 # U-Boot decompresses itself.
 KERNEL_CORRUPT_OFFSET=$((0xE88000))   # 15237120 bytes / ~14.53 MiB
 KERNEL_WARN_MARGIN=$((512 * 1024))    # heads-up 512 KiB before the cliff
 IMAGE_SIZE=$(wc -c < "$BIN_DIR/Image")
-# Boards whose plutomaia.its already ships Image.lzma/compression=lzma
+# Boards whose plutomaia.its ships raw Image compressed with lzma or gzip
 # (see PR #449) let U-Boot do the decompression instead of the kernel's
 # own self-extracting zImage stub, so this offset never applies to them.
 # Boards with no plutomaia.its at all (e.g. pciesdr7010) never generate a
 # flash FIT in the first place -- SD boot uses the uImage path, which
 # U-Boot also decompresses itself -- so the corruption guard is moot there.
-if [ ! -f "$BOARD_DIR/plutomaia.its" ] || grep -q '"lzma"' "$BOARD_DIR/plutomaia.its" 2>/dev/null; then
+if [ ! -f "$BOARD_DIR/plutomaia.its" ] || grep -Eq 'compression[[:space:]]*=[[:space:]]*"(lzma|gzip)"' "$BOARD_DIR/plutomaia.its" 2>/dev/null; then
     :
 elif [ "$IMAGE_SIZE" -ge "$KERNEL_CORRUPT_OFFSET" ]; then
     echo "ERROR: kernel Image is $IMAGE_SIZE bytes, at or past the known" >&2
@@ -58,6 +58,11 @@ elif [ "$IMAGE_SIZE" -ge "$((KERNEL_CORRUPT_OFFSET - KERNEL_WARN_MARGIN))" ]; th
 fi
 
 lzma -z -k -f "$BIN_DIR/Image"
+# Preserve compatibility with stock Pluto bootloaders without using the
+# self-extracting zImage path. Other boards still consume Image.lzma.
+if [ -f "$BOARD_DIR/plutomaia.its" ] && grep -q '"Image.gz"' "$BOARD_DIR/plutomaia.its"; then
+    gzip -n -9 -c "$BIN_DIR/Image" > "$BIN_DIR/Image.gz"
+fi
 
 # Convert FPGA bitstream to raw binary
 echo "img : {$BIN_DIR/system_top.bit }" > "$BIN_DIR/system.bif"
