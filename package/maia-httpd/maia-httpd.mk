@@ -26,7 +26,7 @@ define MAIA_HTTPD_BUILD_CMDS
 	OPENSSL_DIR="$(HOST_DIR)" \
 	OPENBLAS_TARGET=armv7 \
 	OPENBLAS_HOSTCC=gcc \
-	BINDGEN_EXTRA_CLANG_ARGS_armv7_unknown_linux_gnueabihf="--sysroot=$(HOST_DIR)/arm-buildroot-linux-gnueabihf/sysroot" \
+	BINDGEN_EXTRA_CLANG_ARGS_armv7_unknown_linux_gnueabihf="--sysroot=$$($(MAIA_HTTPD_TOOLCHAIN_GCC) -print-sysroot) -isystem $$($(MAIA_HTTPD_TOOLCHAIN_GCC) -print-file-name=include)" \
 	OPENBLAS_CC="$(MAIA_HTTPD_TOOLCHAIN_GCC)" \
 	OPENBLAS_FC="$(MAIA_HTTPD_TOOLCHAIN_GFORTRAN)" \
 	cargo build --release --target armv7-unknown-linux-gnueabihf \
